@@ -10,8 +10,9 @@ float _Epsilon;
 
 float GetHeight(float2 p)
 {
-    p = p + _Time.y * _NoiseSpeed;
-    float h = FractalPerlinNoise3D(float3(p.x, 0, p.y));
+    //p = p + _Time.y * _NoiseSpeed;
+    float y = _Time.y * _NoiseSpeed;
+    float h = FractalPerlinNoise3D(float3(p.x, y, p.y));
     
     return h * _NoiseAmplitude;
 }
