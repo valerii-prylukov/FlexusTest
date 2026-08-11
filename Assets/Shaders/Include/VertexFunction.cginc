@@ -33,13 +33,13 @@ float GetDisplacement(float2 p, float2 uv)
 
 float3 GetNormal(float2 p, float2 uv)
 {
+    float uvEpsilov = _Epsilon / _PlaneSize;
+    
     float2 dpX = float2(_Epsilon, 0);
     float2 dpZ = float2(0, _Epsilon);
     
-    float uvStep = _Epsilon / _PlaneSize;
-    
-    float duvX = float2(uvStep, 0);
-    float duvZ = float2(0, uvStep);
+    float duvX = float2(uvEpsilov, 0);
+    float duvZ = float2(0, uvEpsilov);
     
     float hx0 = GetHeight(p - dpX) + GetFluid(uv - duvX);
     float hx1 = GetHeight(p + dpX) + GetFluid(uv + duvX);
