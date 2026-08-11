@@ -42,28 +42,47 @@ Shader "FlexusTest/Brush"
             float2 _BrushCenter;
             float _BrushRadius, _BrushStrength;
             float _RingRadius, _RingStrength;
+            float _BrushActive;
+            float _DeltaTime;
+            float _OscillationDamping, _OscillationFrequency;
 
             fixed4 frag (v2f i) : SV_Target
             {
-                float2 source = tex2D(_MainTex, i.uv).rg; 
-                float dist = distance(i.uv, _BrushCenter);
+                float2 state = tex2D(_MainTex, i.uv).rg; 
 
-                float inner = 1.0 - smoothstep(0.0, _BrushRadius, dist);
+                float height = state.r;
+                float velocity = state.g;
 
-                float ringStart = _BrushRadius;
-                float ringEnd = _BrushRadius * _RingRadius;
-                float ringPeak = (ringStart + ringEnd) * 0.5;
+                // Oscillation
+                float omega = _OscillationFrequency;
 
-                float ringIn = smoothstep(ringStart, ringPeak, dist);
-                float ringOut = 1.0 - smoothstep(ringPeak, ringEnd, dist);
+                velocity += -height * omega * omega * _DeltaTime;
+                velocity *= exp(-_OscillationDamping * _DeltaTime);
 
-                float ring = ringIn * ringOut;
+                height += velocity * _DeltaTime;
 
-                float brush = -inner * _BrushStrength + ring * _BrushStrength * _RingStrength;
+                // Brush
+                if(_BrushActive > 0.5)
+                {
+                    float dist = distance(i.uv, _BrushCenter);
 
-                source.r += brush;
+                    float inner = 1.0 - smoothstep(0.0, _BrushRadius, dist);
 
-                return float4(source, 0, 1);
+                    float ringStart = _BrushRadius;
+                    float ringEnd = _BrushRadius * _RingRadius;
+                    float ringPeak = (ringStart + ringEnd) * 0.5;
+
+                    float ringIn = smoothstep(ringStart, ringPeak, dist);
+                    float ringOut = 1.0 - smoothstep(ringPeak, ringEnd, dist);
+
+                    float ring = ringIn * ringOut;
+
+                    float brush = -inner * _BrushStrength + ring * _BrushStrength * _RingStrength;
+
+                    height += brush;
+                }
+
+                return float4(height, velocity, 0, 1);
             }
             ENDCG
         }
