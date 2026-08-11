@@ -41,17 +41,27 @@ Shader "FlexusTest/Brush"
 
             float2 _BrushCenter;
             float _BrushRadius, _BrushStrength;
+            float _RingRadius, _RingStrength;
 
             fixed4 frag (v2f i) : SV_Target
             {
+                float2 source = tex2D(_MainTex, i.uv).rg; 
                 float dist = distance(i.uv, _BrushCenter);
 
-                float2 source = tex2D(_MainTex, i.uv).rg; 
-                float col = 1.0 - step(_BrushRadius, dist);
-                source = saturate(source + float2(col, 0));
-                // float 
-                // float depression = -smoothstep(_BrushRadius, 0.0, dist);
-                // float ring = smoothstep(_BrushStrength, _BrushRadius * 1.4, dist) * (1.0 - smoothstep(_BrushRadius * 1.4, _BrushRadius * 1.8, dist))
+                float inner = 1.0 - smoothstep(0.0, _BrushRadius, dist);
+
+                float ringStart = _BrushRadius;
+                float ringEnd = _BrushRadius * _RingRadius;
+                float ringPeak = (ringStart + ringEnd) * 0.5;
+
+                float ringIn = smoothstep(ringStart, ringPeak, dist);
+                float ringOut = 1.0 - smoothstep(ringPeak, ringEnd, dist);
+
+                float ring = ringIn * ringOut;
+
+                float brush = -inner * _BrushStrength + ring * _BrushStrength * _RingStrength;
+
+                source.r += brush;
 
                 return float4(source, 0, 1);
             }
