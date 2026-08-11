@@ -9,29 +9,38 @@ public class FluidPainter : MonoBehaviour
         public static readonly int BrushStrength = Shader.PropertyToID("_BrushStrength");
         public static readonly int RingRadius = Shader.PropertyToID("_RingRadius");
         public static readonly int RingStrength = Shader.PropertyToID("_RingStrength");
+        public static readonly int FluidMask = Shader.PropertyToID("_FluidMask");
     }
     public enum TextureSize { _64x64 = 64, _128x128 = 128, _256x256 = 256, _512x512 = 512, _1024x1024 = 1024 }
 
     [SerializeField] TextureSize textureSize = TextureSize._512x512;
     [SerializeField][Min(1)] int brushRadius = 16;
     [SerializeField][Range(0.0f, 1.0f)] float brushStrength = 0.25f;
-    [SerializeField][Range(0.0f, 2.0f)] float ringRadius = 1.5f;
+    [SerializeField][Range(1.0f, 2.0f)] float ringRadius = 1.5f;
     [SerializeField][Range(0.0f, 1.0f)] float ringStrength = 0.35f;
     [SerializeField] Material brushMaterial;
+    [SerializeField] Material fluidMaterial;
 
-    public RenderTexture maskTexture, tempTexture;
+    private RenderTexture maskTexture, tempTexture;
+    private Camera mainCamera;
 
     void Start()
     {
+        mainCamera = Camera.main;
+
         maskTexture = new RenderTexture((int)textureSize, (int)textureSize, 0, RenderTextureFormat.RGHalf);
         maskTexture.filterMode = FilterMode.Bilinear;
         maskTexture.wrapMode = TextureWrapMode.Clamp;
         maskTexture.Create();
+        ClearRenderTexture(maskTexture);
 
         tempTexture = new RenderTexture((int)textureSize, (int)textureSize, 0, RenderTextureFormat.RGHalf);
         tempTexture.filterMode = FilterMode.Bilinear;
         tempTexture.wrapMode = TextureWrapMode.Clamp;
         tempTexture.Create();
+        ClearRenderTexture(tempTexture);
+
+        fluidMaterial.SetTexture(Uniforms.FluidMask, maskTexture);
     }
 
     void Update()
@@ -40,7 +49,6 @@ public class FluidPainter : MonoBehaviour
         {
             HandleInput();
         }
-
     }
 
     private void OnDestroy()
@@ -58,9 +66,17 @@ public class FluidPainter : MonoBehaviour
         }
     }
 
+    private void ClearRenderTexture(RenderTexture renderTexture)
+    {
+        RenderTexture current = RenderTexture.active;
+        RenderTexture.active = renderTexture;
+        GL.Clear(false, true, Color.clear);
+        RenderTexture.active = current;
+    }
+
     private void HandleInput()
     {
-        Ray inputRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+        Ray inputRay = mainCamera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(inputRay, out RaycastHit hit))
         {
             brushMaterial.SetVector(Uniforms.BrushCenter, hit.textureCoord);

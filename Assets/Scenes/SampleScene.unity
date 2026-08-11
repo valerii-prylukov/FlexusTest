@@ -393,11 +393,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FluidPainter
   textureSize: 512
-  brushRadius: 16
-  brushStrength: 0.25
+  brushRadius: 64
+  brushStrength: 0.01
+  ringRadius: 1.1
+  ringStrength: 0.205
   brushMaterial: {fileID: 2100000, guid: 52d01196e5e01df429c973bf6dabc110, type: 2}
-  maskTexture: {fileID: 0}
-  tempTexture: {fileID: 0}
+  fluidMaterial: {fileID: 2100000, guid: 6817b7e7770b4794482d784b55b150fa, type: 2}
 --- !u!64 &1092926666
 MeshCollider:
   m_ObjectHideFlags: 0

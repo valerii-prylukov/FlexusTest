@@ -10,6 +10,7 @@ Shader "FlexusTest/Fluid"
         _NoiseAmplitude("Noise Amplitude", float) = 1
         _NoiseSpeed("Noise Speed", float) = 1.0
         _Epsilon("Normal Epsilon", Range(0.001, 1.0)) = 1
+        _PlaneSize("Plane Size", Range(1, 100)) = 100
     }
     SubShader
     {

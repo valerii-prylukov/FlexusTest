@@ -7,35 +7,64 @@
 float _NoiseAmplitude;
 float _NoiseSpeed;
 float _Epsilon;
+float _PlaneSize;
+
+uniform sampler2D _FluidMask;
 
 float GetHeight(float2 p)
 {
-    //p = p + _Time.y * _NoiseSpeed;
     float y = _Time.y * _NoiseSpeed;
     float h = FractalPerlinNoise3D(float3(p.x, y, p.y));
     
     return h * _NoiseAmplitude;
 }
 
-FragmentData VertexFunction(VertexData vertexData)
+float GetFluid(float2 uv)
 {
-    //_Epsilon = 1.0;
+    float fluid = tex2Dlod(_FluidMask, float4(uv, 0, 0)).r;
+
+    return fluid;
+}
+
+float GetDisplacement(float2 p, float2 uv)
+{
+    return GetHeight(p) + GetFluid(uv);
+}
+
+float3 GetNormal(float2 p, float2 uv)
+{
+    float2 dpX = float2(_Epsilon, 0);
+    float2 dpZ = float2(0, _Epsilon);
     
-    float2 p = vertexData.vertex.xz;
+    float uvStep = _Epsilon / _PlaneSize;
     
-    float h = GetHeight(p);
-    vertexData.vertex.y += h;
+    float duvX = float2(uvStep, 0);
+    float duvZ = float2(0, uvStep);
     
-    float hx0 = GetHeight(p - float2(_Epsilon, 0));
-    float hx1 = GetHeight(p + float2(_Epsilon, 0));
+    float hx0 = GetHeight(p - dpX) + GetFluid(uv - duvX);
+    float hx1 = GetHeight(p + dpX) + GetFluid(uv + duvX);
     
-    float hz0 = GetHeight(p - float2(0, _Epsilon));
-    float hz1 = GetHeight(p + float2(0, _Epsilon));
+    float hz0 = GetHeight(p - dpZ) + GetFluid(uv - duvZ);
+    float hz1 = GetHeight(p + dpZ) + GetFluid(uv + duvZ);
     
     float dhdx = (hx1 - hx0) / (2.0 * _Epsilon);
     float dhdz = (hz1 - hz0) / (2.0 * _Epsilon);
     
     float3 normal = normalize(float3(-dhdx, 1.0, -dhdz));
+    
+    return normal;
+}
+
+FragmentData VertexFunction(VertexData vertexData)
+{
+    float2 p = vertexData.vertex.xz;
+    float2 uv = vertexData.uv;
+    
+    float displacement = GetDisplacement(p, uv);
+    
+    vertexData.vertex.y += displacement;
+    
+    float3 normal = GetNormal(p, uv);
     
     FragmentData fragmentData;
     fragmentData.vertex = UnityObjectToClipPos(vertexData.vertex);
