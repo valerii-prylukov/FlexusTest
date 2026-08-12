@@ -10,6 +10,7 @@ Shader "FlexusTest/Сhameleon"
         _SpecularColor("Specular Color", Color) = (0.5, 0.5, 0.5, 1.0)
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
         _CubeMap("Cube Map", Cube) = "black" {}
+        _ReflectionStrength("Reflection Strength", Range(0.0, 1.0)) = 0.5
     }
     SubShader
     {
@@ -57,11 +58,12 @@ Shader "FlexusTest/Сhameleon"
             float _FresnelPower;
             float _Metallic;
             float _Smoothness;
+            float _ReflectionStrength;
 
             float3 GetCubeMapValue(float3 viewDir, float3 normal)
             {
-                float3 dir = (-viewDir, normal);
-                float3 reflection = texCUBE(_CubeMap, dir);
+                float3 dir = reflect(-viewDir, normal);
+                float3 reflection = texCUBE(_CubeMap, dir).rgb;
 
                 return reflection;
             }
@@ -92,9 +94,14 @@ Shader "FlexusTest/Сhameleon"
 
                 float3 diffuseColor = albedo * lightColor * nl;
 
-                // float3 reflection = GetCubeMapValue(viewDir, normal);
+                float3 finalColor = diffuseColor + specularColor + ambient;
 
-                return diffuseColor + specularColor + ambient;
+                float3 reflection = GetCubeMapValue(viewDir, normal);
+                float reflectionFactor = _ReflectionStrength * lerp(0.35, 1.0, fresnel);
+
+                finalColor = lerp(finalColor, reflection, reflectionFactor);
+
+                return finalColor;
             }
 
             float3 MetallicLighting(v2f i)
@@ -131,9 +138,14 @@ Shader "FlexusTest/Сhameleon"
 
                 specularColor = specularColor * lightColor * specular;
 
-                // float3 reflection = GetCubeMapValue(viewDir, normal);
+                float3 finalColor = diffuse + specularColor + ambient;
 
-                return diffuse + specularColor + ambient;
+                float3 reflection = GetCubeMapValue(viewDir, normal);
+                float reflectionStrength = _ReflectionStrength *  lerp(0.15, 1.0, _Metallic) * lerp(0.35, 1.0, fresnel);
+
+                finalColor = lerp(finalColor, reflection, reflectionStrength);
+
+                return finalColor;
             }
 
             fixed4 frag (v2f i) : SV_Target
