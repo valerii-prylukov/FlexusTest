@@ -70,8 +70,9 @@ Shader "FlexusTest/Сhameleon"
                 fresnel = pow(fresnel, _FresnelPower);
                 
                 float3 albedo = lerp(_BaseColor.rgb, _EdgeColor.rgb, fresnel);
+                float3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
 
-                float3 diffuseColor = albedo * lightColor * nl;
+                float3 diffuseColor = (albedo * lightColor * nl) + ambient;
 
                 return float4(diffuseColor + specularColor, 1);
             }
