@@ -2,11 +2,14 @@ Shader "FlexusTest/Сhameleon"
 {
     Properties
     {
+        [KeywordEnum(Specular, Metallic)] _LightingMode("Lighting Mode", Float) = 0
         _BaseColor("Base Color", Color) = (0.1, 0.2, 0.8, 1.0)
         _EdgeColor("Edge Color", Color) = (0.8, 0.1, 0.6, 1.0)
         _FresnelPower("Fresnel Power", Range(0.1, 8.0)) = 2.0
+        _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
         _SpecularColor("Specular Color", Color) = (0.5, 0.5, 0.5, 1.0)
         _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+        _CubeMap("Cube Map", Cube) = "black" {}
     }
     SubShader
     {
@@ -18,6 +21,8 @@ Shader "FlexusTest/Сhameleon"
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
+
+            #pragma shader_feature_local _LIGHTINGMODE_SPECULAR _LIGHTINGMODE_METALLIC
 
             #include "UnityCG.cginc"
             #include "UnityLightingCommon.cginc"
@@ -45,24 +50,37 @@ Shader "FlexusTest/Сhameleon"
                 return o;
             }
 
+            samplerCUBE _CubeMap;
             float4 _BaseColor;
             float4 _EdgeColor;
             float4 _SpecularColor;
             float _FresnelPower;
+            float _Metallic;
             float _Smoothness;
 
-            fixed4 frag (v2f i) : SV_Target
+            float3 GetCubeMapValue(float3 viewDir, float3 normal)
+            {
+                float3 dir = (-viewDir, normal);
+                float3 reflection = texCUBE(_CubeMap, dir);
+
+                return reflection;
+            }
+
+            float3 SpecularLighting(v2f i)
             {
                 float3 normal = normalize(i.worldNormal);
                 float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
                 float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+
                 float3 halfVector = normalize(lightDir + viewDir);
+
                 float nl = saturate(dot(lightDir, normal));
-                float reflection = saturate(dot(halfVector, normal));
+                float nh = saturate(dot(halfVector, normal));
+
                 float3 lightColor = _LightColor0.rgb;
 
                 float specularPower = lerp(2.0, 256.0, _Smoothness * _Smoothness);
-                float specular = pow(reflection, specularPower);
+                float specular = pow(nh, specularPower);
                 specular *= nl;
                 float3 specularColor = _SpecularColor.rgb * lightColor * specular;
 
@@ -72,9 +90,63 @@ Shader "FlexusTest/Сhameleon"
                 float3 albedo = lerp(_BaseColor.rgb, _EdgeColor.rgb, fresnel);
                 float3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * albedo;
 
-                float3 diffuseColor = (albedo * lightColor * nl) + ambient;
+                float3 diffuseColor = albedo * lightColor * nl;
 
-                return float4(diffuseColor + specularColor, 1);
+                // float3 reflection = GetCubeMapValue(viewDir, normal);
+
+                return diffuseColor + specularColor + ambient;
+            }
+
+            float3 MetallicLighting(v2f i)
+            {
+                float3 normal = normalize(i.worldNormal);
+                float3 viewDir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
+                float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+
+                float3 halfVector = normalize(lightDir + viewDir);
+
+                float nl = saturate(dot(lightDir, normal));
+                float nh = saturate(dot(halfVector, normal));
+
+                float3 lightColor = _LightColor0.rgb;
+
+                // Fresnel chameleon color
+                float fresnel = 1.0 - saturate(dot(normal, viewDir));
+                fresnel = pow(fresnel, _FresnelPower);
+
+                float3 baseColor = lerp(_BaseColor.rgb, _EdgeColor.rgb, fresnel);
+
+                // Diffuse contribution decreases with metallic
+                float3 diffuseAlbedo = baseColor * (1.0 - _Metallic);
+                float3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz * diffuseAlbedo;
+                float3 diffuse = diffuseAlbedo * lightColor * nl;
+
+                // Specular
+                float specularPower = lerp(2.0, 256.0, _Smoothness * _Smoothness);
+                float specular = pow(nh, specularPower);
+                specular *= nl;
+                // Dielectric -> SpecularColor
+                // Metal      -> BaseColor
+                float3 specularColor = lerp(_SpecularColor.rgb, baseColor, _Metallic);
+
+                specularColor = specularColor * lightColor * specular;
+
+                // float3 reflection = GetCubeMapValue(viewDir, normal);
+
+                return diffuse + specularColor + ambient;
+            }
+
+            fixed4 frag (v2f i) : SV_Target
+            {
+                float3 finalColor;
+
+                #if defined(_LIGHTINGMODE_METALLIC)
+                    finalColor = MetallicLighting(i);
+                #else
+                    finalColor = SpecularLighting(i);
+                #endif
+                
+                return float4(finalColor, 1.0);
             }
             ENDCG
         }
