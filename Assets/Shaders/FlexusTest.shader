@@ -2,7 +2,16 @@ Shader "FlexusTest/Fluid"
 {
     Properties
     {
-        _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
+        [KeywordEnum(Specular, Metallic)] _LightingMode("Lighting Mode", Float) = 0
+        _BaseColor("Base Color", Color) = (0.1, 0.2, 0.8, 1.0)
+        _EdgeColor("Edge Color", Color) = (0.8, 0.1, 0.6, 1.0)
+        _FresnelPower("Fresnel Power", Range(0.1, 8.0)) = 2.0
+        _Metallic("Metallic", Range(0.0, 1.0)) = 0.0
+        _SpecularColor("Specular Color", Color) = (0.5, 0.5, 0.5, 1.0)
+        _Smoothness("Smoothness", Range(0.0, 1.0)) = 0.5
+        _CubeMap("Cube Map", Cube) = "black" {}
+        _ReflectionStrength("Reflection Strength", Range(0.0, 1.0)) = 0.5
+
         _BaseFrequency("Noise Size (Base Frequency)", Range(0.001, 1.0)) = 0.2
         _Octaves("Octaves", Range(1, 8)) = 4
         _Lacunarity("Lacunarity", Range(1.0, 4.0)) = 2.0
