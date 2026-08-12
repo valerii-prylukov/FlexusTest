@@ -10,7 +10,8 @@ struct VertexData
 struct FragmentData
 {
     float4 vertex : SV_POSITION;
-    float3 normal : NORMAL;
+    float3 worldPos : TEXCOORD0;
+    float3 worldNormal : TEXCOORD1;
 };
 
 

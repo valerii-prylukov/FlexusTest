@@ -8,7 +8,7 @@ float3 _Color;
 
 fixed4 FragmentFunction(FragmentData fragmentData) : SV_Target
 {
-    float3 finalColor = LambertLighting(_Color.rgb, fragmentData.normal);
+    float3 finalColor = LambertLighting(_Color.rgb, fragmentData.worldNormal);
     
     //finalColor = normalize(fragmentData.normal);
     //finalColor = finalColor * 0.5 + 0.5;

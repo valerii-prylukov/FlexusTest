@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FluidMaterial
-  m_Shader: {fileID: 4800000, guid: 969cf2305ed39e04286731daa0cc2367, type: 3}
+  m_Name: FluidDisplacement
+  m_Shader: {fileID: 4800000, guid: be5840101556e8d4b929a922f8e60acb, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -61,26 +61,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BaseFrequency: 0.562
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Epsilon: 0.265
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Lacunarity: 1.84
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseAmplitude: 2
-    - _NoiseScale: 25
-    - _NoiseSpeed: 0.2
     - _OcclusionStrength: 1
-    - _Octaves: 4
     - _Parallax: 0.02
-    - _Persistence: 0.544
-    - _PlaneSize: 10
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

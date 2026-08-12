@@ -1,17 +1,12 @@
-Shader "FlexusTest/PerlinNoise"
+Shader "FlexusTest/FluidDisplacement"
 {
     Properties
     {
         _Color("Color", Color) = (1.0, 1.0, 1.0, 1.0)
-        _BaseFrequency("Noise Size (Base Frequency)", Range(0.001, 1.0)) = 0.2
-        _Octaves("Octaves", Range(1, 8)) = 4
-        _Lacunarity("Lacunarity", Range(1.0, 4.0)) = 2.0
-        _Persistence("Persistence", Range(0.0, 1.0)) = 0.5
-        _NoiseAmplitude("Noise Amplitude", float) = 1
-        _NoiseSpeed("Noise Speed", float) = 1.0
         _Epsilon("Normal Epsilon", Range(0.001, 1.0)) = 1
         _PlaneSize("Plane Size", Range(1, 100)) = 100
     }
+
     SubShader
     {
         Tags { "RenderType"="Opaque" }
@@ -25,48 +20,45 @@ Shader "FlexusTest/PerlinNoise"
 
             #include "UnityCG.cginc"
             #include "Include/Lighting.cginc"
-            #include "Include/Noise/FractalNoise.cginc"
 
             struct VertexData
             {
                 float4 vertex   : POSITION;
+                float2 uv       : TEXCOORD0;
             };
 
             struct FragmentData
             {
                 float4 vertex : SV_POSITION;
-                float3 normal : NORMAL;
+                float3 normal : TEXCOORD0;
             };
 
             float4 _Color;
-            float _NoiseAmplitude;
-            float _NoiseSpeed;
+
             float _Epsilon;
             float _PlaneSize;
 
-            float GetHeight(float2 p)
+            uniform sampler2D _FluidMask;
+
+            float GetDisplacement(float2 uv)
             {
-                float y = _Time.y * _NoiseSpeed;
-                float h = FractalPerlinNoise3D(float3(p.x, y, p.y));
-    
-                return h * _NoiseAmplitude;
+                float fluid = tex2Dlod(_FluidMask, float4(uv, 0, 0)).r;
+
+                return fluid;
             }
 
-            float3 GetNormal(float2 p)
+            float3 GetNormal(float2 uv)
             {
-                float uvEpsilov = _Epsilon / _PlaneSize;
+                float uvEpsilon = _Epsilon / _PlaneSize;
+
+                float hx0 = GetDisplacement(uv - float2(uvEpsilon, 0));
+                float hx1 = GetDisplacement(uv + float2(uvEpsilon, 0));
     
-                float2 dpX = float2(_Epsilon, 0);
-                float2 dpZ = float2(0, _Epsilon);
+                float hz0 = GetDisplacement(uv - float2(0, uvEpsilon));
+                float hz1 = GetDisplacement(uv + float2(0, uvEpsilon));
     
-                float hx0 = GetHeight(p - dpX);
-                float hx1 = GetHeight(p + dpX);
-    
-                float hz0 = GetHeight(p - dpZ);
-                float hz1 = GetHeight(p + dpZ);
-    
-                float dhdx = (hx1 - hx0) / (2.0 * _Epsilon);
-                float dhdz = (hz1 - hz0) / (2.0 * _Epsilon);
+                float dhdx = (hx1 - hx0) / (2.0 * uvEpsilon);
+                float dhdz = (hz1 - hz0) / (2.0 * uvEpsilon);
     
                 float3 normal = normalize(float3(-dhdx, 1.0, -dhdz));
     
@@ -75,13 +67,13 @@ Shader "FlexusTest/PerlinNoise"
 
             FragmentData VertexFunction(VertexData vertexData)
             {
-                float2 p = vertexData.vertex.xz;
+                float2 uv = vertexData.uv;
     
-                float displacement = GetHeight(p);
+                float displacement = GetDisplacement(uv);
     
                 vertexData.vertex.y += displacement;
     
-                float3 normal = GetNormal(p);
+                float3 normal = GetNormal(uv);
     
                 FragmentData fragmentData;
                 fragmentData.vertex = UnityObjectToClipPos(vertexData.vertex);

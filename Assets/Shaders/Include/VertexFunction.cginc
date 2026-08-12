@@ -68,7 +68,8 @@ FragmentData VertexFunction(VertexData vertexData)
     
     FragmentData fragmentData;
     fragmentData.vertex = UnityObjectToClipPos(vertexData.vertex);
-    fragmentData.normal = UnityObjectToWorldNormal(normal);
+    fragmentData.worldPos = mul(unity_ObjectToWorld, vertexData.vertex).xyz;
+    fragmentData.worldNormal = UnityObjectToWorldNormal(normal);
     
     return fragmentData;
 }
