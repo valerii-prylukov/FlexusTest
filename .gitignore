@@ -55,13 +55,13 @@ Thumbs.db
 sysinfo.txt
 
 # =========================
-# Addressables (если используешь)
+# Addressables
 # =========================
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
 
-# =========================
-# Temporary exclude textures.
-# Will be reviewed and cleaned before public release.
-# =========================
-/[Aa]ssets/[Tt]extures
+# Android builds
+/Android/
+
+# Unity temporary build data
+/.utmp/
 
