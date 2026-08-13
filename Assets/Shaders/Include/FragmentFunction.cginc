@@ -5,6 +5,8 @@
 #include "Lighting.cginc"
 
 samplerCUBE _CubeMap;
+half4 _CubeMap_HDR;
+
 float4 _BaseColor;
 float4 _EdgeColor;
 float4 _SpecularColor;
@@ -24,7 +26,9 @@ float GetFluidVelocity(float2 uv)
 float3 GetCubeMapValue(float3 viewDir, float3 normal)
 {
     float3 dir = reflect(-viewDir, normal);
-    float3 reflection = texCUBE(_CubeMap, dir).rgb;
+    
+    half4 encodedReflection = texCUBE(_CubeMap, dir);
+    float3 reflection = DecodeHDR(encodedReflection, _CubeMap_HDR);
 
     return reflection;
 }
