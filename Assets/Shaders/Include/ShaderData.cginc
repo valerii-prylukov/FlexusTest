@@ -12,7 +12,9 @@ struct FragmentData
     float4 vertex : SV_POSITION;
     float3 worldPos : TEXCOORD0;
     float3 worldNormal : TEXCOORD1;
+    float2 uv : TEXCOORD2;
 };
 
+uniform sampler2D _FluidMask;
 
 #endif

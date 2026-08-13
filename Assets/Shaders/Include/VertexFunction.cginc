@@ -9,8 +9,6 @@ float _NoiseSpeed;
 float _Epsilon;
 float _PlaneSize;
 
-uniform sampler2D _FluidMask;
-
 float GetHeight(float2 p)
 {
     float y = _Time.y * _NoiseSpeed;
@@ -70,6 +68,7 @@ FragmentData VertexFunction(VertexData vertexData)
     fragmentData.vertex = UnityObjectToClipPos(vertexData.vertex);
     fragmentData.worldPos = mul(unity_ObjectToWorld, vertexData.vertex).xyz;
     fragmentData.worldNormal = UnityObjectToWorldNormal(normal);
+    fragmentData.uv = uv;
     
     return fragmentData;
 }

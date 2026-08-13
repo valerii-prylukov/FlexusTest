@@ -20,6 +20,9 @@ Shader "FlexusTest/Fluid"
         _NoiseSpeed("Noise Speed", float) = 1.0
         _Epsilon("Normal Epsilon", Range(0.001, 1.0)) = 1
         _PlaneSize("Plane Size", Range(1, 100)) = 100
+    
+        _WaveColor("Wave Color", Color) = (0.2, 0.8, 1.0, 1)
+        _WaveColorStrength("Wave Color Strength", Range(0.0, 5.0)) = 1.0
     }
     SubShader
     {
