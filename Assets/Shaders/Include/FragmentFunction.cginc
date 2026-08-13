@@ -108,7 +108,7 @@ fixed4 FragmentFunction(FragmentData fragmentData) : SV_Target
     #if defined(_LIGHTINGMODE_METALLIC)
         finalColor = MetallicLighting(fragmentData);
     #else
-    finalColor = SpecularLighting(fragmentData);
+        finalColor = SpecularLighting(fragmentData);
     #endif
                 
     return float4(finalColor, 1.0);

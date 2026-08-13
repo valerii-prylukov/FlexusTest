@@ -66,14 +66,14 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
-    - _Epsilon: 0.238
+    - _Epsilon: 0.1
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Lacunarity: 2
     - _Metallic: 0
     - _Mode: 0
-    - _NoiseAmplitude: 4.39
+    - _NoiseAmplitude: 4
     - _NoiseSpeed: 0.25
     - _OcclusionStrength: 1
     - _Octaves: 4
