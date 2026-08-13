@@ -32,6 +32,8 @@ Shader "FlexusTest/Fluid"
             #pragma vertex VertexFunction
             #pragma fragment FragmentFunction
 
+            #pragma shader_feature_local _LIGHTINGMODE_SPECULAR _LIGHTINGMODE_METALLIC
+
             #include "UnityCG.cginc"
 
             #include "Include/VertexFunction.cginc"

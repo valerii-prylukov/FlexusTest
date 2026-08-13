@@ -398,10 +398,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FluidPainter
   textureSize: 512
   brushRadius: 64
-  brushStrength: 0.01
-  ringRadius: 1.1
-  ringStrength: 0.205
-  ostillationDamping: 0.996
+  brushStrength: 0.005
+  ringRadius: 1.3
+  ringStrength: 0.3
+  ostillationDamping: 1
   ostillationFrequency: 4
   brushMaterial: {fileID: 2100000, guid: 52d01196e5e01df429c973bf6dabc110, type: 2}
   fluidMaterial: {fileID: 2100000, guid: 6817b7e7770b4794482d784b55b150fa, type: 2}
