@@ -52,15 +52,34 @@ public class FluidPainter : MonoBehaviour
     void Update()
     {
         bool brushActive = false;
-        Vector2 brushCenter = Vector2.zero;
+        Vector2 inputPosition = Vector2.zero;
 
-        if (Input.GetMouseButton(0))
+        if(Input.touchCount > 0)
         {
-            Ray inputRay = mainCamera.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(inputRay, out RaycastHit hit))
+            Touch touch = Input.GetTouch(0);
+            if(touch.phase != TouchPhase.Ended && touch.phase != TouchPhase.Canceled)
             {
                 brushActive = true;
+                inputPosition = touch.position;
+            }
+        }
+        else if(Input.GetMouseButton(0))
+        {
+            brushActive = true;
+            inputPosition = Input.mousePosition;
+        }
+
+        Vector2 brushCenter = Vector2.zero;
+        if (brushActive)
+        {
+            Ray inputRay = mainCamera.ScreenPointToRay(inputPosition);
+            if (Physics.Raycast(inputRay, out RaycastHit hit))
+            {
                 brushCenter = hit.textureCoord;
+            }
+            else
+            {
+                brushActive = false;
             }
         }
 
@@ -77,6 +96,8 @@ public class FluidPainter : MonoBehaviour
 
         Graphics.Blit(maskTexture, tempTexture, brushMaterial);
         (maskTexture, tempTexture) = (tempTexture, maskTexture);
+
+        fluidMaterial.SetTexture(Uniforms.FluidMask, maskTexture);
     }
 
     private void OnDestroy()
